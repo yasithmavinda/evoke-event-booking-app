@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "402408696800",
+    "project_id": "evoke-afc79",
+    "storage_bucket": "evoke-afc79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:402408696800:android:3c6cea127a7989b80cd985",
+        "android_client_info": {
+          "package_name": "com.eventhub.eventhub_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe-KWB4MTZKsCEZOebtT08aA7i3QSiIso"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
