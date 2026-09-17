@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/bookings_screen.dart';
 import 'screens/profile_screen.dart';
@@ -16,7 +18,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Seed initial data using the correct FirestoreService class
+  // Seed initial data
   await FirestoreService().seedInitialEvents();
   
   runApp(const EvokeApp());
@@ -63,7 +65,32 @@ class EvokeApp extends StatelessWidget {
           elevation: 10,
         ),
       ),
-      home: const SplashScreen(),
+      home: const AuthWrapper(),
+    );
+  }
+}
+
+/// A wrapper widget that listens to the auth state and routes the user
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: AuthService().userStream,
+      builder: (context, snapshot) {
+        // While checking auth status, show splash
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SplashScreen();
+        }
+        
+        // If user is logged in, show navigation screen, else login screen
+        if (snapshot.hasData) {
+          return const MainNavigationScreen();
+        } else {
+          return const LoginScreen();
+        }
+      },
     );
   }
 }

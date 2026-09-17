@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_widgets.dart';
 import '../services/auth_service.dart';
-import '../main.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,28 +16,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
+  bool _isPasswordObscured = true;
 
   void _register() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      final success = await _authService.register(
-        _nameController.text.trim(),
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-
-      setState(() => _isLoading = false);
-
-      if (success && mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-          (route) => false,
+      try {
+        await _authService.registerUser(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          name: _nameController.text.trim(),
         );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration failed. Please try again.')),
-        );
+        // Navigation is handled automatically by AuthWrapper in main.dart
+        if (mounted) {
+          Navigator.of(context).pop(); // Go back to login/wrapper
+        }
+      } catch (e) {
+        if (mounted) {
+          ErrorSnackbar.show(context, e.toString());
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
@@ -68,7 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Join EventHub to explore the best events',
+                  'Join Evoke to explore the best events',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 40),
@@ -99,8 +100,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 CustomTextField(
                   label: 'Password',
                   icon: Icons.lock_outline_rounded,
-                  isPassword: true,
+                  obscureText: _isPasswordObscured,
                   controller: _passwordController,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordObscured = !_isPasswordObscured;
+                      });
+                    },
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Password is required';
                     if (value.length < 8) return 'Password must be at least 8 characters';

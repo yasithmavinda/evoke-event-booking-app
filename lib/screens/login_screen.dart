@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../widgets/custom_widgets.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
-import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,28 +16,101 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
+  bool _isPasswordObscured = true;
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
-      final success = await _authService.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-
-      setState(() => _isLoading = false);
-
-      if (success && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      try {
+        await _authService.loginUser(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid credentials. Try again.')),
-        );
+        // Navigation is handled automatically by AuthWrapper in main.dart
+      } catch (e) {
+        if (mounted) {
+          ErrorSnackbar.show(context, e.toString());
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
+  }
+
+  void _showForgotPasswordDialog() {
+    final TextEditingController _resetEmailController = TextEditingController();
+    final GlobalKey<FormState> _resetFormKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        title: const Text('Reset Password', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Form(
+          key: _resetFormKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Enter your email to receive a password reset link.',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                label: 'Email Address',
+                icon: Icons.email_outlined,
+                controller: _resetEmailController,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Email is required';
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    return 'Enter a valid email';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              if (_resetFormKey.currentState!.validate()) {
+                try {
+                  await _authService.resetPassword(_resetEmailController.text.trim());
+                  if (mounted) {
+                    Navigator.pop(context); // Close dialog
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Reset link sent to your email'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ErrorSnackbar.show(context, e.toString());
+                  }
+                }
+              }
+            },
+            child: const Text('Send Reset Link', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -80,8 +152,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 CustomTextField(
                   label: 'Password',
                   icon: Icons.lock_outline_rounded,
-                  isPassword: true,
+                  obscureText: _isPasswordObscured,
                   controller: _passwordController,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordObscured = !_isPasswordObscured;
+                      });
+                    },
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Password is required';
                     if (value.length < 6) return 'Password must be at least 6 characters';
@@ -92,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: _showForgotPasswordDialog,
                     child: Text(
                       'Forgot Password?',
                       style: TextStyle(color: Theme.of(context).primaryColor),
