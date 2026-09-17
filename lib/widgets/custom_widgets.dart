@@ -3,19 +3,21 @@ import 'package:flutter/material.dart';
 class CustomTextField extends StatelessWidget {
   final String label;
   final IconData icon;
-  final bool isPassword;
+  final bool obscureText;
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
+  final Widget? suffixIcon;
 
   const CustomTextField({
     super.key,
     required this.label,
     required this.icon,
-    this.isPassword = false,
+    this.obscureText = false,
     this.controller,
     this.validator,
     this.keyboardType,
+    this.suffixIcon,
   });
 
   @override
@@ -33,7 +35,7 @@ class CustomTextField extends StatelessWidget {
       ),
       child: TextFormField(
         controller: controller,
-        obscureText: isPassword,
+        obscureText: obscureText,
         validator: validator,
         keyboardType: keyboardType,
         style: const TextStyle(color: Colors.white),
@@ -41,6 +43,7 @@ class CustomTextField extends StatelessWidget {
           labelText: label,
           labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
           prefixIcon: Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+          suffixIcon: suffixIcon,
           filled: true,
           fillColor: const Color(0xFF1F2937),
           enabledBorder: OutlineInputBorder(

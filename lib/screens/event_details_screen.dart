@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/event_model.dart';
 import '../services/booking_service.dart';
@@ -38,10 +40,36 @@ class EventDetailsScreen extends StatelessWidget {
               backgroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () {
-              BookingService.bookEvent(event);
-              Navigator.pop(context);
-              _showSuccessSnackbar(context);
+            onPressed: () async {
+              try {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null) throw 'User not logged in';
+
+                // Create booking in Firestore
+                await FirebaseFirestore.instance.collection('bookings').add({
+                  'userId': user.uid,
+                  'eventId': event.id,
+                  'eventName': event.name,
+                  'eventDate': event.date.toIso8601String(),
+                  'imageUrl': event.imageUrl,
+                  'status': 'Active',
+                  'timestamp': FieldValue.serverTimestamp(),
+                });
+
+                // Decrement Available Seats
+                await FirebaseFirestore.instance.collection('events').doc(event.id).update({
+                  'availableSeats': FieldValue.increment(-1),
+                });
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  _showSuccessSnackbar(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ErrorSnackbar.show(context, 'Booking failed: $e');
+                }
+              }
             },
             child: const Text('Confirm', style: TextStyle(color: Colors.white)),
           ),

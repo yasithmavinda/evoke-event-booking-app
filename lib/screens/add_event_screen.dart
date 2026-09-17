@@ -2,11 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/event_model.dart';
 import '../services/firebase_service.dart';
 import '../widgets/custom_widgets.dart';
 
 class AddEventScreen extends StatefulWidget {
-  const AddEventScreen({super.key});
+  final EventModel? editEvent; // Optional: If provided, the screen acts as an 'Edit' screen
+
+  const AddEventScreen({super.key, this.editEvent});
 
   @override
   State<AddEventScreen> createState() => _AddEventScreenState();
@@ -18,67 +21,68 @@ class _AddEventScreenState extends State<AddEventScreen> {
   bool _isLoading = false;
 
   // Controllers
-  final _nameController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _locationController;
+  late TextEditingController _priceController;
+  late TextEditingController _seatsController;
+  late TextEditingController _descriptionController;
 
   // State for Pickers & Image
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   String _selectedCategory = 'Music';
   File? _imageFile;
+  String? _existingImageUrl;
 
   final List<String> _categories = ['Music', 'Art', 'Tech', 'Food', 'Sports', 'Wellness'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with existing data if editing
+    _nameController = TextEditingController(text: widget.editEvent?.name);
+    _locationController = TextEditingController(text: widget.editEvent?.location);
+    _priceController = TextEditingController(text: widget.editEvent?.price.toString());
+    _seatsController = TextEditingController(text: widget.editEvent?.availableSeats.toString());
+    _descriptionController = TextEditingController(text: widget.editEvent?.description);
+    
+    if (widget.editEvent != null) {
+      _selectedCategory = widget.editEvent!.category;
+      _selectedDate = widget.editEvent!.date;
+      _existingImageUrl = widget.editEvent!.imageUrl;
+      // Note: Parsing TimeOfDay from string is omitted for brevity, usually stored separately
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _locationController.dispose();
+    _priceController.dispose();
+    _seatsController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     
     if (image != null) {
-      setState(() => _imageFile = File(image.path));
+      setState(() {
+        _imageFile = File(image.path);
+        _existingImageUrl = null; // Clear existing if new one picked
+      });
     }
-  }
-
-  Future<void> _pickDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().add(const Duration(days: 1)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) => _buildPickerTheme(context, child!),
-    );
-    if (picked != null) setState(() => _selectedDate = picked);
-  }
-
-  Future<void> _pickTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-      builder: (context, child) => _buildPickerTheme(context, child!),
-    );
-    if (picked != null) setState(() => _selectedTime = picked);
-  }
-
-  Widget _buildPickerTheme(BuildContext context, Widget child) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        colorScheme: ColorScheme.dark(
-          primary: Theme.of(context).primaryColor,
-          surface: const Color(0xFF1F2937),
-        ),
-      ),
-      child: child,
-    );
   }
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      if (_selectedDate == null || _selectedTime == null) {
-        ErrorSnackbar.show(context, 'Please select both date and time');
+      if (_selectedDate == null) {
+        ErrorSnackbar.show(context, 'Please select a date');
         return;
       }
-      if (_imageFile == null) {
+      if (_imageFile == null && _existingImageUrl == null) {
         ErrorSnackbar.show(context, 'Please select an event image');
         return;
       }
@@ -90,23 +94,34 @@ class _AddEventScreenState extends State<AddEventScreen> {
           'name': _nameController.text.trim(),
           'category': _selectedCategory,
           'date': _selectedDate!.toIso8601String(),
-          'time': _selectedTime!.format(context),
+          'time': _selectedTime?.format(context) ?? '09:00 AM',
           'location': _locationController.text.trim(),
           'price': double.tryParse(_priceController.text) ?? 0.0,
           'description': _descriptionController.text.trim(),
-          'availableSeats': 100,
+          'availableSeats': int.tryParse(_seatsController.text) ?? 0,
+          'imageUrl': _existingImageUrl, // Might be updated by service if _imageFile is provided
         };
 
-        await _firestoreService.uploadNewEvent(eventData, _imageFile);
+        if (widget.editEvent != null) {
+          // Update existing
+          if (_imageFile != null) {
+            String newUrl = await _firestoreService.uploadImageToImgBB(_imageFile!);
+            eventData['imageUrl'] = newUrl;
+          }
+          await _firestoreService.updateEvent(widget.editEvent!.id, eventData);
+        } else {
+          // Upload new
+          await _firestoreService.uploadNewEvent(eventData, _imageFile);
+        }
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Event Created Successfully!'), backgroundColor: Colors.green),
+            SnackBar(content: Text(widget.editEvent != null ? 'Event Updated!' : 'Event Created!'), backgroundColor: Colors.green),
           );
           Navigator.pop(context);
         }
       } catch (e) {
-        if (mounted) ErrorSnackbar.show(context, 'Failed to create event: $e');
+        if (mounted) ErrorSnackbar.show(context, 'Operation failed: $e');
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -118,7 +133,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       appBar: AppBar(
-        title: const Text('Create New Event'),
+        title: Text(widget.editEvent != null ? 'Edit Event' : 'Create New Event'),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -129,7 +144,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildImagePicker(),
                   const SizedBox(height: 24),
@@ -148,7 +162,15 @@ class _AddEventScreenState extends State<AddEventScreen> {
                         child: _buildPickerTile(
                           icon: Icons.calendar_today_rounded,
                           text: _selectedDate == null ? 'Date' : DateFormat('MMM dd, yyyy').format(_selectedDate!),
-                          onTap: _pickDate,
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedDate ?? DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                            );
+                            if (picked != null) setState(() => _selectedDate = picked);
+                          },
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -156,7 +178,10 @@ class _AddEventScreenState extends State<AddEventScreen> {
                         child: _buildPickerTile(
                           icon: Icons.access_time_rounded,
                           text: _selectedTime == null ? 'Time' : _selectedTime!.format(context),
-                          onTap: _pickTime,
+                          onTap: () async {
+                            final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                            if (picked != null) setState(() => _selectedTime = picked);
+                          },
                         ),
                       ),
                     ],
@@ -178,6 +203,14 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
+                    label: 'Available Seats',
+                    icon: Icons.event_seat_rounded,
+                    controller: _seatsController,
+                    keyboardType: TextInputType.number,
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
                     label: 'Description',
                     icon: Icons.description_rounded,
                     controller: _descriptionController,
@@ -185,7 +218,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   ),
                   const SizedBox(height: 40),
                   PrimaryButton(
-                    text: 'Create Event',
+                    text: widget.editEvent != null ? 'Update Event' : 'Create Event',
                     isLoading: _isLoading,
                     onPressed: _submitForm,
                   ),
@@ -193,11 +226,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
               ),
             ),
           ),
-          if (_isLoading)
-            Container(
-              color: Colors.black54,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
+          if (_isLoading) Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );
@@ -213,11 +242,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
           color: const Color(0xFF1F2937),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.white.withOpacity(0.1)),
-          image: _imageFile != null 
-            ? DecorationImage(image: FileImage(_imageFile!), fit: BoxFit.cover) 
+          image: (_imageFile != null || _existingImageUrl != null)
+            ? DecorationImage(
+                image: _imageFile != null ? FileImage(_imageFile!) : NetworkImage(_existingImageUrl!) as ImageProvider,
+                fit: BoxFit.cover) 
             : null,
         ),
-        child: _imageFile == null 
+        child: (_imageFile == null && _existingImageUrl == null)
           ? Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

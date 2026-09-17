@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 
+/// A premium, animated Splash Screen for the Evoke app.
+/// Featuring a typewriter animation for the brand name.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -20,32 +23,38 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
 
+    // Initialize the Animation Controller for the logo
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.8, curve: Curves.easeIn)),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
     _controller.forward();
+
+    // Navigate after exactly 3 seconds
     _navigateToNext();
   }
 
   Future<void> _navigateToNext() async {
-    await Future.delayed(const Duration(milliseconds: 2000));
+    // Exact 3-second display duration
+    await Future.delayed(const Duration(seconds: 3));
     
     if (!mounted) return;
+
     final authService = AuthService();
     final bool loggedIn = await authService.isLoggedIn();
 
     if (!mounted) return;
 
+    // Seamless Fade Transition to the next screen
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => 
@@ -72,32 +81,47 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Center(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Opacity(
-              opacity: _fadeAnimation.value,
-              child: Transform.scale(
-                scale: _scaleAnimation.value,
-                child: Text(
-                  'EVOKE',
-                  style: GoogleFonts.montserrat(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo with Fade and Scale Animation
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _fadeAnimation.value,
+                  child: Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: Image.asset(
+                      'assets/icon.png',
+                      width: 120, // Adjusted for balanced layout
+                      height: 120,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            // Typewriter Animation for "Evoke"
+            AnimatedTextKit(
+              animatedTexts: [
+                TypewriterAnimatedText(
+                  'Evoke',
+                  textStyle: GoogleFonts.montserrat(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 12,
                     color: primaryColor,
-                    shadows: [
-                      Shadow(
-                        color: primaryColor.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 0),
-                      ),
-                    ],
+                    letterSpacing: 4.0,
                   ),
+                  speed: const Duration(milliseconds: 200),
                 ),
-              ),
-            );
-          },
+              ],
+              totalRepeatCount: 1,
+              displayFullTextOnTap: true,
+              stopPauseOnTap: true,
+            ),
+          ],
         ),
       ),
     );

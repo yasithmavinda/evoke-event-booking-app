@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import '../models/event_model.dart';
 
@@ -39,6 +40,9 @@ class FirestoreService {
   /// Uploads a new event with an image hosted on ImgBB.
   Future<void> uploadNewEvent(Map<String, dynamic> eventData, File? imageFile) async {
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
       String imageUrl = eventData['imageUrl'] ?? '';
 
       if (imageFile != null) {
@@ -46,14 +50,47 @@ class FirestoreService {
       }
 
       eventData['imageUrl'] = imageUrl;
+      eventData['organizerId'] = user.uid; // Link event to organizer
       eventData['createdAt'] = FieldValue.serverTimestamp();
 
       await _firestore.collection('events').add(eventData);
-      print('✅ Success: New event uploaded with ImgBB image.');
     } catch (e) {
       print('❌ Error uploading event: $e');
       throw Exception('Failed to upload event.');
     }
+  }
+
+  /// Updates an existing event
+  Future<void> updateEvent(String eventId, Map<String, dynamic> data) async {
+    try {
+      await _firestore.collection('events').doc(eventId).update(data);
+    } catch (e) {
+      throw Exception('Failed to update event: $e');
+    }
+  }
+
+  /// Deletes an event
+  Future<void> deleteEvent(String eventId) async {
+    try {
+      await _firestore.collection('events').doc(eventId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete event: $e');
+    }
+  }
+
+  /// Streams events for a specific organizer
+  Stream<List<EventModel>> getOrganizerEventsStream(String organizerId) {
+    return _firestore
+        .collection('events')
+        .where('organizerId', isEqualTo: organizerId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return EventModel.fromJson({...data, 'id': doc.id});
+      }).toList();
+    });
   }
 
   /// Seeds initial events if the collection is empty.

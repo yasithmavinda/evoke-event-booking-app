@@ -4,7 +4,43 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fae141da-05c0-4535-ad80-c1affe0acb96" name="Changes" comment="" />
+    <list default="true" id="fae141da-05c0-4535-ad80-c1affe0acb96" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/.filecache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/app.dill" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/app.dill" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/dart_build_result.json" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/dart_build_result.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/debug_android_application.stamp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/flutter_assets.d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/kernel_snapshot_program.d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/kernel_snapshot_program.stamp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/outputs.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/dependencies.dependencies_hash_file.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/hook.dependencies_hash_file.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/hook.dill" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/hook.dill.d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/input.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/output.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/stderr.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/stdout.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/shared/objective_c/.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/package_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/package_config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/package_graph.json" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/package_graph.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins-dependencies" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/add_event_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/add_event_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/bookings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/bookings_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/event_details_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/event_details_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/login_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/profile_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/register_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/register_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/splash_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/auth_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/auth_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/firebase_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/firebase_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/custom_widgets.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/custom_widgets.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,6 +67,9 @@
       </state>
     </system>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 6
 }]]></component>
@@ -50,6 +89,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "settings.editor.selected.configurable": "preferences.pluginManager",

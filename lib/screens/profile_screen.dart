@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import 'login_screen.dart';
+import '../services/firebase_service.dart';
 import 'add_event_screen.dart';
+import 'organizer_dashboard_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -20,10 +21,12 @@ class ProfileScreen extends StatelessWidget {
             child: Icon(Icons.person, size: 50, color: Colors.white),
           ),
           const SizedBox(height: 16),
-          FutureBuilder<String?>(
-            future: authService.getUserEmail(),
+          // Stream of auth state to show current user email
+          StreamBuilder(
+            stream: authService.userStream,
             builder: (context, snapshot) {
-              return Text(snapshot.data ?? 'User', style: Theme.of(context).textTheme.titleLarge);
+              final user = snapshot.data;
+              return Text(user?.email ?? 'User', style: Theme.of(context).textTheme.titleLarge);
             },
           ),
           const SizedBox(height: 24),
@@ -36,21 +39,16 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AddEventScreen()),
+                MaterialPageRoute(builder: (_) => const OrganizerDashboardScreen()),
               );
             },
-            child: const Text('Organize Event'),
+            child: const Text('Organizer Dashboard'),
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () async {
               await authService.logout();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (route) => false,
-                );
-              }
+              // AuthWrapper in main.dart handles the UI switch
             },
             child: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
           ),
