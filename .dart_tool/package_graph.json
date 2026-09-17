@@ -82,6 +82,14 @@
       ]
     },
     {
+      "name": "animated_text_kit",
+      "version": "4.3.0",
+      "dependencies": [
+        "characters",
+        "flutter"
+      ]
+    },
+    {
       "name": "image_picker",
       "version": "1.2.3",
       "dependencies": [
@@ -362,6 +370,11 @@
       ]
     },
     {
+      "name": "characters",
+      "version": "1.4.1",
+      "dependencies": []
+    },
+    {
       "name": "image_picker_windows",
       "version": "0.2.2",
       "dependencies": [
@@ -614,11 +627,6 @@
       "dependencies": [
         "collection"
       ]
-    },
-    {
-      "name": "characters",
-      "version": "1.4.1",
-      "dependencies": []
     },
     {
       "name": "string_scanner",
@@ -956,14 +964,6 @@
         "collection",
         "meta",
         "pub_semver"
-      ]
-    },
-    {
-      "name": "animated_text_kit",
-      "version": "4.3.0",
-      "dependencies": [
-        "characters",
-        "flutter"
       ]
     }
   ],

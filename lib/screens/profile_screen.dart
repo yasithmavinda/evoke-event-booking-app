@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../services/firebase_service.dart';
-import 'add_event_screen.dart';
 import 'organizer_dashboard_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -10,49 +8,64 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = AuthService();
+    const Color primaryAccent = Color(0xFFD73B22);
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircleAvatar(
-            radius: 50,
-            backgroundColor: Color(0xFF1F2937),
-            child: Icon(Icons.person, size: 50, color: Colors.white),
-          ),
-          const SizedBox(height: 16),
-          // Stream of auth state to show current user email
-          StreamBuilder(
-            stream: authService.userStream,
-            builder: (context, snapshot) {
-              final user = snapshot.data;
-              return Text(user?.email ?? 'User', style: Theme.of(context).textTheme.titleLarge);
-            },
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Profile')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            const Center(
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person_rounded, size: 60, color: Colors.grey),
+              ),
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const OrganizerDashboardScreen()),
-              );
-            },
-            child: const Text('Organizer Dashboard'),
-          ),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: () async {
-              await authService.logout();
-              // AuthWrapper in main.dart handles the UI switch
-            },
-            child: const Text('Logout', style: TextStyle(color: Colors.redAccent)),
-          ),
-        ],
+            const SizedBox(height: 20),
+            StreamBuilder(
+              stream: authService.userStream,
+              builder: (context, snapshot) {
+                final user = snapshot.data;
+                return Text(
+                  user?.email ?? 'User',
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF1A1A1A)),
+                );
+              },
+            ),
+            const SizedBox(height: 40),
+            
+            _buildProfileMenu(
+              context,
+              icon: Icons.dashboard_customize_rounded,
+              title: 'Organizer Dashboard',
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OrganizerDashboardScreen())),
+            ),
+            _buildProfileMenu(
+              context,
+              icon: Icons.logout_rounded,
+              title: 'Logout',
+              color: Colors.redAccent,
+              onTap: () async => await authService.logout(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileMenu(BuildContext context, {required IconData icon, required String title, required VoidCallback onTap, Color? color}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ListTile(
+        onTap: onTap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        tileColor: Colors.white,
+        leading: Icon(icon, color: color ?? const Color(0xFFD73B22)),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: color ?? const Color(0xFF1A1A1A))),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
       ),
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/event_model.dart';
 import '../services/firebase_service.dart';
@@ -15,26 +14,55 @@ class OrganizerDashboardScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        title: const Text('Delete Event?'),
-        content: const Text('Are you sure? All bookings for this event will be orphaned.'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Delete Event?', style: TextStyle(fontWeight: FontWeight.w900)),
+        content: const Text('Are you sure you want to remove this event?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel', style: TextStyle(color: Colors.grey))),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: TextStyle(color: Colors.grey[600]))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             onPressed: () async {
               Navigator.pop(context);
               try {
                 await FirestoreService().deleteEvent(eventId);
+              } catch (e) {
+                if (context.mounted) ErrorSnackbar.show(context, e.toString());
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendReminder(BuildContext context, String eventId, String eventName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Send Reminder?', style: TextStyle(fontWeight: FontWeight.w900)),
+        content: Text('Send a reminder notification to all attendees of "$eventName"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: TextStyle(color: Colors.grey[600]))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD73B22), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await FirestoreService().sendManualReminder(eventId, eventName);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event deleted successfully')));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reminders sent to attendees!'), backgroundColor: Colors.green));
                 }
               } catch (e) {
                 if (context.mounted) ErrorSnackbar.show(context, e.toString());
               }
             },
-            child: const Text('Delete'),
+            child: const Text('Send', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -44,30 +72,18 @@ class OrganizerDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final FirestoreService firestoreService = FirestoreService();
+    const Color primaryAccent = Color(0xFFD73B22);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111827),
-      appBar: AppBar(
-        title: const Text('Organizer Dashboard'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Dashboard')),
       body: StreamBuilder<List<EventModel>>(
-        stream: firestoreService.getOrganizerEventsStream(user?.uid ?? ''),
+        stream: FirestoreService().getOrganizerEventsStream(user?.uid ?? ''),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
-          }
+          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
           final events = snapshot.data ?? [];
 
           if (events.isEmpty) {
-            return const Center(
-              child: Text('You haven\'t created any events yet.', style: TextStyle(color: Colors.white38)),
-            );
+            return Center(child: Text('No events created yet.', style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold)));
           }
 
           return ListView.builder(
@@ -76,37 +92,32 @@ class OrganizerDashboardScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = events[index];
               return Container(
-                margin: const EdgeInsets.only(bottom: 20),
+                margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1F2937),
-                  borderRadius: BorderRadius.circular(25),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: Column(
                   children: [
                     ListTile(
-                      contentPadding: const EdgeInsets.all(16),
+                      contentPadding: const EdgeInsets.all(12),
                       leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                         child: Image.network(event.imageUrl, width: 60, height: 60, fit: BoxFit.cover),
                       ),
-                      title: Text(event.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(DateFormat('MMM dd, yyyy').format(event.date), style: const TextStyle(color: Colors.white60)),
+                      title: Text(event.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                      subtitle: Text(DateFormat('MMM dd').format(event.date), style: TextStyle(color: Colors.grey[500])),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.edit_rounded, color: Colors.blueAccent),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => AddEventScreen(editEvent: event)),
-                              );
-                            },
+                            icon: const Icon(Icons.alarm_rounded, color: Colors.orangeAccent),
+                            onPressed: () => _sendReminder(context, event.id, event.name),
+                            tooltip: 'Send Reminder',
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-                            onPressed: () => _deleteEvent(context, event.id),
-                          ),
+                          IconButton(icon: const Icon(Icons.edit_outlined, color: Colors.blueAccent), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEventScreen(editEvent: event)))),
+                          IconButton(icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent), onPressed: () => _deleteEvent(context, event.id)),
                         ],
                       ),
                     ),
@@ -115,19 +126,11 @@ class OrganizerDashboardScreen extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Seats: ${event.availableSeats}', style: const TextStyle(color: Color(0xFFFF9030))),
-                          ElevatedButton.icon(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => EventBookingsScreen(eventId: event.id, eventName: event.name)),
-                            ),
-                            icon: const Icon(Icons.people_outline_rounded, size: 18),
-                            label: const Text('View Bookings'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF9030),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
+                          Text('${event.availableSeats} seats left', style: const TextStyle(color: primaryAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                          ElevatedButton(
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventBookingsScreen(eventId: event.id, eventName: event.name))),
+                            style: ElevatedButton.styleFrom(backgroundColor: primaryAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(horizontal: 16)),
+                            child: const Text('BOOKINGS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white)),
                           ),
                         ],
                       ),

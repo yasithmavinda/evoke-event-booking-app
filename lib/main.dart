@@ -1,7 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -13,14 +13,8 @@ import 'services/firebase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Seed initial data
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirestoreService().seedInitialEvents();
-  
   runApp(const EvokeApp());
 }
 
@@ -29,40 +23,55 @@ class EvokeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFFFF9030); // Toxic Violex
-    const Color backgroundColor = Color(0xFF111827); // Soft Chrome
+    // Premium Light Theme Palette
+    const Color primaryAccent = Color(0xFFD73B22); // Deep Red-Orange
+    const Color backgroundGray = Color(0xFFF5F5F7); // Off-white
+    const Color charcoalBlack = Color(0xFF1A1A1A); // Dark Charcoal
 
     return MaterialApp(
       title: 'Evoke',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: backgroundColor,
-        primaryColor: primaryColor,
-        colorScheme: const ColorScheme.dark(
-          primary: primaryColor,
-          secondary: primaryColor,
-          surface: Color(0xFF1F2937),
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: backgroundGray,
+        primaryColor: primaryAccent,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryAccent,
+          primary: primaryAccent,
+          surface: Colors.white,
+          background: backgroundGray,
         ),
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).copyWith(
-          displayLarge: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 32),
-          titleLarge: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 20),
-          bodyLarge: GoogleFonts.poppins(color: Colors.white70, fontSize: 16),
-          bodyMedium: GoogleFonts.poppins(color: Colors.white60, fontSize: 14),
+        textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+          displayLarge: GoogleFonts.poppins(
+            fontWeight: FontWeight.w800,
+            color: charcoalBlack,
+            fontSize: 32,
+          ),
+          titleLarge: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            color: charcoalBlack,
+            fontSize: 20,
+          ),
+          bodyLarge: GoogleFonts.poppins(
+            color: Colors.grey[800],
+            fontSize: 16,
+          ),
+          bodyMedium: GoogleFonts.poppins(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: backgroundColor,
+          backgroundColor: backgroundGray,
           elevation: 0,
           centerTitle: false,
-          titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF1F2937),
-          selectedItemColor: primaryColor,
-          unselectedItemColor: Colors.grey,
-          type: BottomNavigationBarType.fixed,
-          elevation: 10,
+          titleTextStyle: TextStyle(
+            color: charcoalBlack,
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+          ),
+          iconTheme: IconThemeData(color: charcoalBlack),
         ),
       ),
       home: const AuthWrapper(),
@@ -70,21 +79,17 @@ class EvokeApp extends StatelessWidget {
   }
 }
 
-/// A wrapper widget that listens to the auth state and routes the user
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
+    return StreamBuilder(
       stream: AuthService().userStream,
       builder: (context, snapshot) {
-        // While checking auth status, show splash
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SplashScreen();
         }
-        
-        // If user is logged in, show navigation screen, else login screen
         if (snapshot.hasData) {
           return const MainNavigationScreen();
         } else {
@@ -111,35 +116,63 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const ProfileScreen(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _screens[_selectedIndex],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
+      body: Stack(
+        children: [
+          _screens[_selectedIndex],
+          // Custom Floating Navigation Bar (Glassmorphism)
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 30,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(40),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
+                child: Container(
+                  height: 75,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A).withOpacity(0.65),
+                    borderRadius: BorderRadius.circular(40),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.1),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildNavItem(0, Icons.explore_rounded),
+                      _buildNavItem(1, Icons.confirmation_number_rounded),
+                      _buildNavItem(2, Icons.person_rounded),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIndex = index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFD73B22) : Colors.transparent,
+          shape: BoxShape.circle,
         ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.confirmation_number_rounded), label: 'Bookings'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
-          ],
+        child: Icon(
+          icon,
+          color: Colors.white,
+          size: 28,
         ),
       ),
     );

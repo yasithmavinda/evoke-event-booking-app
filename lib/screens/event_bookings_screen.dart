@@ -9,61 +9,137 @@ class EventBookingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Premium Light Theme Palette
+    const Color primaryAccent = Color(0xFFD73B22);
+    const Color backgroundGray = Color(0xFFF5F5F7);
+    const Color charcoalBlack = Color(0xFF1A1A1A);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF111827),
+      backgroundColor: backgroundGray,
       appBar: AppBar(
-        title: Text('Bookings: $eventName'),
+        title: Text(
+          eventName,
+          style: const TextStyle(
+            color: charcoalBlack,
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: charcoalBlack, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('bookings')
             .where('eventId', isEqualTo: eventId)
+            .orderBy('timestamp', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: primaryAccent));
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            );
           }
           final bookings = snapshot.data?.docs ?? [];
 
           if (bookings.isEmpty) {
-            return const Center(
-              child: Text('No bookings yet for this event.', style: TextStyle(color: Colors.white38)),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people_outline_rounded, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No bookings yet for this event.',
+                    style: TextStyle(color: Colors.grey[500], fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             itemCount: bookings.length,
             itemBuilder: (context, index) {
               final data = bookings[index].data() as Map<String, dynamic>;
-              // In a real app, you might fetch user names from a 'users' collection
-              // but here we show the info saved in the booking document.
+              final String status = data['status'] ?? 'Active';
+              final bool isActive = status == 'Active';
+
               return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1F2937),
-                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    const CircleAvatar(
-                      backgroundColor: Colors.white10,
-                      child: Icon(Icons.person, color: Colors.white),
+                    CircleAvatar(
+                      backgroundColor: backgroundGray,
+                      radius: 25,
+                      child: const Icon(Icons.person_rounded, color: primaryAccent, size: 28),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('User ID: ${data['userId']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                          Text('Status: ${data['status']}', style: TextStyle(color: data['status'] == 'Active' ? Colors.greenAccent : Colors.grey)),
+                          const Text(
+                            'ATTENDEE',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.grey,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            data['userId'],
+                            style: const TextStyle(
+                              color: charcoalBlack,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isActive ? Colors.green[50] : Colors.red[50],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        status.toUpperCase(),
+                        style: TextStyle(
+                          color: isActive ? Colors.green[700] : Colors.red[700],
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],

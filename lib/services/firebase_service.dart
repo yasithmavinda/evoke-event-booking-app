@@ -60,10 +60,72 @@ class FirestoreService {
     }
   }
 
-  /// Updates an existing event
+  /// Mark notification as read
+  Future<void> markNotificationAsRead(String notificationId) async {
+    await _firestore.collection('notifications').doc(notificationId).update({'isRead': true});
+  }
+
+  /// 4-Type Requirement: Sends an in-app notification
+  Future<void> sendNotification({
+    required String userId,
+    required String title,
+    required String message,
+    required String type,
+  }) async {
+    try {
+      await _firestore.collection('notifications').add({
+        'userId': userId,
+        'title': title,
+        'message': message,
+        'type': type, // 1: confirmation, 2: cancellation, 3: update, 4: reminder
+        'isRead': false,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('❌ Notification Error: $e');
+    }
+  }
+
+  /// Requirement 3: Notify all attendees of an Event Update
+  Future<void> notifyAttendeesOfUpdate(String eventId, String eventName) async {
+    final bookings = await _firestore.collection('bookings')
+        .where('eventId', isEqualTo: eventId)
+        .where('status', isEqualTo: 'Active')
+        .get();
+
+    for (var doc in bookings.docs) {
+      await sendNotification(
+        userId: doc.data()['userId'],
+        title: 'Event Update: $eventName',
+        message: 'The details for an event you booked have been updated. Please check the latest info.',
+        type: 'event_update',
+      );
+    }
+  }
+
+  /// Requirement 4: Notify all attendees of an Event Reminder
+  Future<void> sendManualReminder(String eventId, String eventName) async {
+    final bookings = await _firestore.collection('bookings')
+        .where('eventId', isEqualTo: eventId)
+        .where('status', isEqualTo: 'Active')
+        .get();
+
+    for (var doc in bookings.docs) {
+      await sendNotification(
+        userId: doc.data()['userId'],
+        title: 'Reminder: $eventName',
+        message: 'Get ready! Your event is happening soon. Don\'t forget to check your ticket.',
+        type: 'event_reminder',
+      );
+    }
+  }
+
+  /// Updates an existing event and triggers update notifications
   Future<void> updateEvent(String eventId, Map<String, dynamic> data) async {
     try {
       await _firestore.collection('events').doc(eventId).update(data);
+      // Trigger Requirement 3
+      await notifyAttendeesOfUpdate(eventId, data['name']);
     } catch (e) {
       throw Exception('Failed to update event: $e');
     }

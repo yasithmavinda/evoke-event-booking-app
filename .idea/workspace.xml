@@ -7,11 +7,16 @@
     <list default="true" id="fae141da-05c0-4535-ad80-c1affe0acb96" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/.filecache" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/app.dill" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/app.dill" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/dart_build_result.json" beforeDir="false" afterPath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/dart_build_result.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/dart_build.d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/dart_build.stamp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/dart_build_result.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/debug_android_application.stamp" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/flutter_assets.d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/install_code_assets.d" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/install_code_assets.stamp" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/kernel_snapshot_program.d" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/kernel_snapshot_program.stamp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/native_assets.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/flutter_build/b59980c7b63e5dd50d6fa47340925355/outputs.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/.lock" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.dart_tool/hooks_runner/objective_c/64aadbb5e9/dependencies.dependencies_hash_file.json" beforeDir="false" />
@@ -30,16 +35,15 @@
       <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/add_event_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/add_event_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/bookings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/bookings_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/event_bookings_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/event_bookings_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/event_details_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/event_details_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/home_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/login_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/organizer_dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/organizer_dashboard_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/profile_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/register_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/register_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/splash_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/auth_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/auth_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/services/firebase_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/firebase_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/widgets/custom_widgets.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/custom_widgets.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,32 +74,32 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="3JPikcdhPsRjykOTim6Ir8CGL6k" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Flutter.main.dart.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "show.migrate.to.gradle.popup": "false"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Flutter.main.dart">
     <configuration name="eventhub_app_android" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="eventhub_app_android" />

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/event_model.dart';
-import '../services/booking_service.dart';
+import '../services/firebase_service.dart';
 import '../widgets/custom_widgets.dart';
 
 class EventDetailsScreen extends StatelessWidget {
@@ -12,40 +12,43 @@ class EventDetailsScreen extends StatelessWidget {
   const EventDetailsScreen({super.key, required this.event});
 
   void _showBookingDialog(BuildContext context) {
+    const Color primaryAccent = Color(0xFFD73B22);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        title: Text('Confirm Booking', style: Theme.of(context).textTheme.titleLarge),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+        title: const Text('Confirm Booking', style: TextStyle(fontWeight: FontWeight.w800)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Event: ${event.name}', style: const TextStyle(color: Colors.white70)),
-            const SizedBox(height: 8),
-            Text('Price: ${event.formattedPrice}',
-                 style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            const Text('Do you want to proceed with the booking?', style: TextStyle(color: Colors.white60)),
+            Text('Event: ${event.name}', style: TextStyle(color: Colors.grey[800])),
+            const SizedBox(height: 12),
+            Text(
+              'Total: ${event.formattedPrice}',
+              style: const TextStyle(color: primaryAccent, fontWeight: FontWeight.w900, fontSize: 18),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: primaryAccent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             onPressed: () async {
               try {
                 final user = FirebaseAuth.instance.currentUser;
                 if (user == null) throw 'User not logged in';
 
-                // Create booking in Firestore
+                // 1. Create booking in Firestore
                 await FirebaseFirestore.instance.collection('bookings').add({
                   'userId': user.uid,
                   'eventId': event.id,
@@ -56,7 +59,15 @@ class EventDetailsScreen extends StatelessWidget {
                   'timestamp': FieldValue.serverTimestamp(),
                 });
 
-                // Decrement Available Seats
+                // 2. Trigger Requirement 1: Booking Confirmation Notification
+                await FirestoreService().sendNotification(
+                  userId: user.uid,
+                  title: 'Booking Confirmed!',
+                  message: 'You have successfully booked ${event.name}.',
+                  type: 'booking_confirm',
+                );
+
+                // 3. Decrement Available Seats
                 await FirebaseFirestore.instance.collection('events').doc(event.id).update({
                   'availableSeats': FieldValue.increment(-1),
                 });
@@ -71,7 +82,7 @@ class EventDetailsScreen extends StatelessWidget {
                 }
               }
             },
-            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -84,163 +95,141 @@ class EventDetailsScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         content: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.greenAccent.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))
-            ],
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(24),
           ),
           child: const Row(
             children: [
-              Icon(Icons.check_circle_outline, color: Colors.black),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Booking Successful! View in My Bookings.',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-              ),
+              Icon(Icons.check_circle_rounded, color: Colors.greenAccent),
+              SizedBox(width: 16),
+              Text('Successfully Booked!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    const Color primaryAccent = Color(0xFFD73B22);
+    final bool isSoldOut = event.availableSeats <= 0;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Full-bleed Image with Hero
+          // Header Image
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: MediaQuery.of(context).size.height * 0.45,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: Hero(
               tag: 'event-image-${event.id}',
-              child: Image.network(
-                event.imageUrl,
-                fit: BoxFit.cover,
-              ),
+              child: Image.network(event.imageUrl, fit: BoxFit.cover),
             ),
           ),
-
-          // Gradient Overlay for readability of back button
+          
+          // Back Button
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 120,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black.withOpacity(0.7), Colors.transparent],
-                ),
+            top: 60,
+            left: 20,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                child: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
               ),
             ),
           ),
 
-          // Content Container
+          // Content Sheet
           Positioned.fill(
-            top: MediaQuery.of(context).size.height * 0.4,
+            top: MediaQuery.of(context).size.height * 0.42,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+              padding: const EdgeInsets.fromLTRB(30, 40, 30, 0),
               decoration: const BoxDecoration(
-                color: Color(0xFF111827),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+                color: Color(0xFFF5F5F7),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(48)),
               ),
               child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            event.category,
-                            style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                            const SizedBox(width: 4),
-                            Text('4.8', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ],
+                    Text(
+                      event.category.toUpperCase(),
+                      style: const TextStyle(color: primaryAccent, fontWeight: FontWeight.w800, letterSpacing: 2),
                     ),
-                    const SizedBox(height: 16),
-                    Text(event.name, style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 28)),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
+                    Text(event.name, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, height: 1.1)),
+                    const SizedBox(height: 25),
                     
-                    // Info Row
-                    Row(
-                      children: [
-                        _buildInfoIcon(Icons.calendar_month_rounded, DateFormat('MMM dd, yyyy').format(event.date)),
-                        const SizedBox(width: 20),
-                        _buildInfoIcon(Icons.access_time_filled_rounded, event.time),
-                      ],
+                    _buildInfoRow(Icons.calendar_month_rounded, DateFormat('EEEE, dd MMMM').format(event.date)),
+                    const SizedBox(height: 16),
+                    _buildInfoRow(Icons.location_on_rounded, event.location),
+                    const SizedBox(height: 16),
+                    _buildInfoRow(
+                      Icons.event_seat_outlined, 
+                      event.availableSeats > 0 ? '${event.availableSeats} Seats Available' : 'Sold Out',
+                      isWarning: isSoldOut,
                     ),
-                    const SizedBox(height: 16),
-                    _buildInfoIcon(Icons.location_on_rounded, event.location),
                     
-                    const SizedBox(height: 30),
-                    Text('About Event', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 40),
+                    const Text('About', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 12),
                     Text(
                       event.description,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.6),
                     ),
-                    const SizedBox(height: 100), // Space for Book Now button
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
             ),
           ),
 
-          // Back Button
+          // Bottom CTA
           Positioned(
-            top: 50,
-            left: 20,
-            child: IconButton(
-              style: IconButton.styleFrom(backgroundColor: Colors.black26),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-
-          // Bottom Bar with Book Now Button
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
+            bottom: 40,
+            left: 30,
+            right: 30,
             child: Container(
-              padding: const EdgeInsets.all(24),
+              height: 80,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [const Color(0xFF111827).withOpacity(0), const Color(0xFF111827)],
-                ),
+                color: const Color(0xFF1A1A1A),
+                borderRadius: BorderRadius.circular(35),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10))],
               ),
-              child: PrimaryButton(
-                text: 'Book Now • ${event.formattedPrice}',
-                onPressed: () => _showBookingDialog(context),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Price', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                      Text(event.formattedPrice, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  ElevatedButton(
+                    onPressed: isSoldOut ? null : () => _showBookingDialog(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isSoldOut ? Colors.grey[800] : primaryAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      elevation: 0,
+                    ),
+                    child: Text(isSoldOut ? 'SOLD OUT' : 'Book Now', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
               ),
             ),
           ),
@@ -249,19 +238,25 @@ class EventDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoIcon(IconData icon, String text) {
+  Widget _buildInfoRow(IconData icon, String text, {bool isWarning = false}) {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1F2937),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: Colors.white70, size: 18),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+          child: Icon(icon, color: const Color(0xFFD73B22), size: 20),
         ),
-        const SizedBox(width: 12),
-        Text(text, style: const TextStyle(color: Colors.white70)),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            text, 
+            style: TextStyle(
+              fontWeight: FontWeight.w600, 
+              fontSize: 15,
+              color: isWarning ? const Color(0xFFD73B22) : Colors.black,
+            )
+          )
+        ),
       ],
     );
   }

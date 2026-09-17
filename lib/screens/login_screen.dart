@@ -27,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
-        // Navigation is handled automatically by AuthWrapper in main.dart
       } catch (e) {
         if (mounted) {
           ErrorSnackbar.show(context, e.toString());
@@ -47,9 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F2937),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        title: const Text('Reset Password', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+        title: const Text('Reset Password', style: TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.w900)),
         content: Form(
           key: _resetFormKey,
           child: Column(
@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const Text(
                 'Enter your email to receive a password reset link.',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
               const SizedBox(height: 20),
               CustomTextField(
@@ -67,9 +67,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Email is required';
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                    return 'Enter a valid email';
-                  }
                   return null;
                 },
               ),
@@ -79,34 +76,29 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: const Color(0xFFD73B22),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             onPressed: () async {
               if (_resetFormKey.currentState!.validate()) {
                 try {
                   await _authService.resetPassword(_resetEmailController.text.trim());
                   if (mounted) {
-                    Navigator.pop(context); // Close dialog
+                    Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Reset link sent to your email'),
-                        backgroundColor: Colors.green,
-                      ),
+                      const SnackBar(content: Text('Reset link sent to your email'), backgroundColor: Colors.green),
                     );
                   }
                 } catch (e) {
-                  if (mounted) {
-                    ErrorSnackbar.show(context, e.toString());
-                  }
+                  if (mounted) ErrorSnackbar.show(context, e.toString());
                 }
               }
             },
-            child: const Text('Send Reset Link', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text('Send Link', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -118,35 +110,28 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
                 Text(
-                  'Welcome Back!',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32),
+                  'Welcome\nBack!',
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(height: 1.1),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
                   'Login to continue your event journey',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 60),
                 CustomTextField(
                   label: 'Email Address',
                   icon: Icons.email_outlined,
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Email is required';
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Enter a valid email';
-                    }
-                    return null;
-                  },
+                  validator: (value) => (value == null || value.isEmpty) ? 'Email is required' : null,
                 ),
                 const SizedBox(height: 20),
                 CustomTextField(
@@ -157,57 +142,38 @@ class _LoginScreenState extends State<LoginScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
-                      color: Theme.of(context).primaryColor,
+                      color: const Color(0xFFD73B22),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordObscured = !_isPasswordObscured;
-                      });
-                    },
+                    onPressed: () => setState(() => _isPasswordObscured = !_isPasswordObscured),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Password is required';
-                    if (value.length < 6) return 'Password must be at least 6 characters';
-                    return null;
-                  },
+                  validator: (value) => (value == null || value.isEmpty) ? 'Password is required' : null,
                 ),
                 const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: _showForgotPasswordDialog,
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Theme.of(context).primaryColor),
-                    ),
+                    child: const Text('Forgot Password?', style: TextStyle(color: Color(0xFFD73B22), fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 40),
                 PrimaryButton(
-                  text: 'Login',
+                  text: 'LOGIN',
                   isLoading: _isLoading,
                   onPressed: _login,
                 ),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                        );
-                      },
-                      child: Text(
-                        'Register Now',
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+                const SizedBox(height: 40),
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Don't have an account? ", style: TextStyle(color: Colors.grey[600])),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                        child: const Text('Register', style: TextStyle(color: Color(0xFFD73B22), fontWeight: FontWeight.w900)),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

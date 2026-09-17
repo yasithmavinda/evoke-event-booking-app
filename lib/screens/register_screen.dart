@@ -28,18 +28,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           password: _passwordController.text,
           name: _nameController.text.trim(),
         );
-        // Navigation is handled automatically by AuthWrapper in main.dart
-        if (mounted) {
-          Navigator.of(context).pop(); // Go back to login/wrapper
-        }
+        if (mounted) Navigator.of(context).pop();
       } catch (e) {
-        if (mounted) {
-          ErrorSnackbar.show(context, e.toString());
-        }
+        if (mounted) ErrorSnackbar.show(context, e.toString());
       } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
@@ -49,9 +42,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -64,12 +56,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Create Account',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32),
+                  'Join\nEvoke',
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(height: 1.1),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
-                  'Join Evoke to explore the best events',
+                  'Create an account to explore events',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 40),
@@ -77,10 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: 'Full Name',
                   icon: Icons.person_outline_rounded,
                   controller: _nameController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Name is required';
-                    return null;
-                  },
+                  validator: (value) => (value == null || value.isEmpty) ? 'Name is required' : null,
                 ),
                 const SizedBox(height: 20),
                 CustomTextField(
@@ -88,13 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   icon: Icons.email_outlined,
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Email is required';
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Enter a valid email';
-                    }
-                    return null;
-                  },
+                  validator: (value) => (value == null || value.isEmpty) ? 'Email is required' : null,
                 ),
                 const SizedBox(height: 20),
                 CustomTextField(
@@ -105,44 +88,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
-                      color: Theme.of(context).primaryColor,
+                      color: const Color(0xFFD73B22),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordObscured = !_isPasswordObscured;
-                      });
-                    },
+                    onPressed: () => setState(() => _isPasswordObscured = !_isPasswordObscured),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Password is required';
-                    if (value.length < 8) return 'Password must be at least 8 characters';
-                    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-                      return 'Must include upper, lower & number';
-                    }
+                    if (value.length < 8) return 'Minimum 8 characters';
                     return null;
                   },
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
                 PrimaryButton(
-                  text: 'Create Account',
+                  text: 'CREATE ACCOUNT',
                   isLoading: _isLoading,
                   onPressed: _register,
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
                 Center(
                   child: GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: RichText(
                       text: TextSpan(
                         text: 'Already have an account? ',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        children: [
+                        style: TextStyle(color: Colors.grey[600]),
+                        children: const [
                           TextSpan(
                             text: 'Login',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(color: Color(0xFFD73B22), fontWeight: FontWeight.w900),
                           ),
                         ],
                       ),

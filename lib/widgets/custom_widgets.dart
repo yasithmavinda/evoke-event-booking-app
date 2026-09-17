@@ -22,14 +22,17 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color primaryAccent = Color(0xFFD73B22);
+    
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -38,31 +41,32 @@ class CustomTextField extends StatelessWidget {
         obscureText: obscureText,
         validator: validator,
         keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white),
+        cursorColor: primaryAccent,
+        style: const TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-          prefixIcon: Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+          labelStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+          prefixIcon: Icon(icon, color: primaryAccent, size: 22),
           suffixIcon: suffixIcon,
           filled: true,
-          fillColor: const Color(0xFF1F2937),
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.5),
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(color: primaryAccent, width: 1.5),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             borderSide: const BorderSide(color: Colors.redAccent, width: 1),
           ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         ),
       ),
     );
@@ -83,25 +87,15 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      height: 60,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: const Color(0xFFD73B22),
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           elevation: 0,
         ),
         child: isLoading
@@ -112,7 +106,7 @@ class PrimaryButton extends StatelessWidget {
               )
             : Text(
                 text,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 1),
               ),
       ),
     );
@@ -127,26 +121,19 @@ class ErrorSnackbar {
         elevation: 0,
         behavior: SnackBarBehavior.floating,
         content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFFEF4444), // Vibrant Red
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.white),
+              const Icon(Icons.error_outline_rounded, color: Color(0xFFD73B22)),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   message,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
